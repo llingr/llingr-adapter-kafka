@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 The llingr-adapter-kafka Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package kafkaadapter_test
+package integration_test
 
 import (
 	"context"
@@ -136,7 +136,7 @@ func publishMessages(t *testing.T, bootstrapServers, topic string, count int) {
 }
 
 type consumerHandle struct {
-	consumer *kafkaadapter.SimpleConsumer
+	consumer *SimpleConsumer
 	adapter  *kafkaadapter.Adapter
 }
 
@@ -166,11 +166,11 @@ func createConsumer(
 		t.Fatalf("failed to create adapter: %v", err)
 	}
 
-	builder := kafkaadapter.NewSimpleConsumerBuilder(topic, process)
+	builder := NewSimpleConsumerBuilder(topic, process)
 	consumer := adapter.CreateConsumer(builder)
-	sc, ok := consumer.(*kafkaadapter.SimpleConsumer)
+	sc, ok := consumer.(*SimpleConsumer)
 	if !ok {
-		t.Fatal("expected *kafkaadapter.SimpleConsumer")
+		t.Fatal("expected *SimpleConsumer")
 	}
 
 	return &consumerHandle{
@@ -512,11 +512,11 @@ func runRebalancePhaseTest(t *testing.T, strategy string) {
 			t.Fatalf("failed to create adapter: %v", err)
 		}
 
-		builder := kafkaadapter.NewSimpleConsumerBuilder(topic, process)
+		builder := NewSimpleConsumerBuilder(topic, process)
 		consumer := adapter.CreateConsumer(builder)
-		sc, ok := consumer.(*kafkaadapter.SimpleConsumer)
+		sc, ok := consumer.(*SimpleConsumer)
 		if !ok {
-			t.Fatal("expected *kafkaadapter.SimpleConsumer")
+			t.Fatal("expected *SimpleConsumer")
 		}
 
 		return &consumerHandle{
@@ -779,11 +779,11 @@ func TestConfigOptions_SessionTimeout(t *testing.T) {
 		return nil
 	}
 
-	builder := kafkaadapter.NewSimpleConsumerBuilder(topic, process)
+	builder := NewSimpleConsumerBuilder(topic, process)
 	c := adapter.CreateConsumer(builder)
-	consumer, ok := c.(*kafkaadapter.SimpleConsumer)
+	consumer, ok := c.(*SimpleConsumer)
 	if !ok {
-		t.Fatal("expected *kafkaadapter.SimpleConsumer")
+		t.Fatal("expected *SimpleConsumer")
 	}
 	defer func() { _ = consumer.Shutdown() }()
 
@@ -827,11 +827,11 @@ func TestConfigOptions_MaxPollInterval(t *testing.T) {
 		return nil
 	}
 
-	builder := kafkaadapter.NewSimpleConsumerBuilder(topic, process)
+	builder := NewSimpleConsumerBuilder(topic, process)
 	c := adapter.CreateConsumer(builder)
-	consumer, ok := c.(*kafkaadapter.SimpleConsumer)
+	consumer, ok := c.(*SimpleConsumer)
 	if !ok {
-		t.Fatal("expected *kafkaadapter.SimpleConsumer")
+		t.Fatal("expected *SimpleConsumer")
 	}
 	defer func() { _ = consumer.Shutdown() }()
 
@@ -878,11 +878,11 @@ func TestConfigOptions_FetchSettings(t *testing.T) {
 		return nil
 	}
 
-	builder := kafkaadapter.NewSimpleConsumerBuilder(topic, process)
+	builder := NewSimpleConsumerBuilder(topic, process)
 	c := adapter.CreateConsumer(builder)
-	consumer, ok := c.(*kafkaadapter.SimpleConsumer)
+	consumer, ok := c.(*SimpleConsumer)
 	if !ok {
-		t.Fatal("expected *kafkaadapter.SimpleConsumer")
+		t.Fatal("expected *SimpleConsumer")
 	}
 	defer func() { _ = consumer.Shutdown() }()
 
@@ -926,11 +926,11 @@ func TestConfigOptions_IsolationLevel(t *testing.T) {
 		return nil
 	}
 
-	builder := kafkaadapter.NewSimpleConsumerBuilder(topic, process)
+	builder := NewSimpleConsumerBuilder(topic, process)
 	c := adapter.CreateConsumer(builder)
-	consumer, ok := c.(*kafkaadapter.SimpleConsumer)
+	consumer, ok := c.(*SimpleConsumer)
 	if !ok {
-		t.Fatal("expected *kafkaadapter.SimpleConsumer")
+		t.Fatal("expected *SimpleConsumer")
 	}
 	defer func() { _ = consumer.Shutdown() }()
 
@@ -974,11 +974,11 @@ func TestConfigOptions_ClientID(t *testing.T) {
 		return nil
 	}
 
-	builder := kafkaadapter.NewSimpleConsumerBuilder(topic, process)
+	builder := NewSimpleConsumerBuilder(topic, process)
 	c := adapter.CreateConsumer(builder)
-	consumer, ok := c.(*kafkaadapter.SimpleConsumer)
+	consumer, ok := c.(*SimpleConsumer)
 	if !ok {
-		t.Fatal("expected *kafkaadapter.SimpleConsumer")
+		t.Fatal("expected *SimpleConsumer")
 	}
 	defer func() { _ = consumer.Shutdown() }()
 
@@ -1023,11 +1023,11 @@ func TestConfigOptions_QueuedSettings(t *testing.T) {
 		return nil
 	}
 
-	builder := kafkaadapter.NewSimpleConsumerBuilder(topic, process)
+	builder := NewSimpleConsumerBuilder(topic, process)
 	c := adapter.CreateConsumer(builder)
-	consumer, ok := c.(*kafkaadapter.SimpleConsumer)
+	consumer, ok := c.(*SimpleConsumer)
 	if !ok {
-		t.Fatal("expected *kafkaadapter.SimpleConsumer")
+		t.Fatal("expected *SimpleConsumer")
 	}
 	defer func() { _ = consumer.Shutdown() }()
 
@@ -1163,11 +1163,11 @@ func TestAllMessagesDelivered_NoLoss(t *testing.T) {
 		t.Fatalf("failed to create adapter: %v", err)
 	}
 
-	builder := kafkaadapter.NewSimpleConsumerBuilder(topic, process)
+	builder := NewSimpleConsumerBuilder(topic, process)
 	c := adapter.CreateConsumer(builder)
-	consumer, ok := c.(*kafkaadapter.SimpleConsumer)
+	consumer, ok := c.(*SimpleConsumer)
 	if !ok {
-		t.Fatal("expected *kafkaadapter.SimpleConsumer")
+		t.Fatal("expected *SimpleConsumer")
 	}
 	defer func() { _ = consumer.Shutdown() }()
 

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 The llingr-adapter-kafka Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package kafkaadapter
+package integration_test
 
 import (
 	"context"
@@ -21,7 +21,18 @@ const (
 
 	// initialMetricsCapacity is the initial slice capacity for collected metrics.
 	initialMetricsCapacity = 1000
+
+	// testTopicName is the placeholder topic used by mock-based unit tests.
+	testTopicName = "test-topic"
 )
+
+// mockLogger is a no-op logger used by mock-based SimpleConsumer unit tests.
+type mockLogger struct{}
+
+func (m *mockLogger) Debug(_ context.Context, _ string, _ ...any) {}
+func (m *mockLogger) Info(_ context.Context, _ string, _ ...any)  {}
+func (m *mockLogger) Warn(_ context.Context, _ string, _ ...any)  {}
+func (m *mockLogger) Error(_ context.Context, _ string, _ ...any) {}
 
 // SimpleConsumer is a minimal test consumer: poll → process → commit.
 // Ignores processing errors, collects metrics to a slice.
