@@ -1,5 +1,12 @@
 # llingr-adapter-kafka
 
+[![CI](https://github.com/llingr/llingr-adapter-kafka/actions/workflows/ci.yml/badge.svg)](https://github.com/llingr/llingr-adapter-kafka/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/llingr/llingr-adapter-kafka.svg)](https://pkg.go.dev/github.com/llingr/llingr-adapter-kafka)
+[![Go Report Card](https://goreportcard.com/badge/github.com/llingr/llingr-adapter-kafka)](https://goreportcard.com/report/github.com/llingr/llingr-adapter-kafka)
+[![Tag](https://img.shields.io/github/v/tag/llingr/llingr-adapter-kafka)](https://github.com/llingr/llingr-adapter-kafka/tags)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/llingr/llingr-adapter-kafka)](go.mod)
+
 Kafka adapter for [llingr-nexus](https://github.com/llingr/llingr-nexus)
 consumers, built on [confluent-kafka-go](https://github.com/confluentinc/confluent-kafka-go).
 
