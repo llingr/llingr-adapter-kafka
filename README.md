@@ -351,6 +351,47 @@ overhead (under 1%) compared to raw payload sizes. Compression visibility
 (CompressedBytes, UncompressedBytes) is not exposed through the bundled
 librdkafka version's statistics interface and will be zero.
 
+## Repository Layout
+
+This repo is split into two Go modules:
+
+```
+llingr-adapter-kafka/
+├── go.mod                     # kafkaadapter module - what consumers import
+├── kafkaadapter/              # public API + unit tests
+└── integration/
+    ├── go.mod                 # separate module: testcontainers + Docker deps
+    ├── simple_consumer_helper_test.go
+    ├── simple_consumer_test.go
+    └── kafka_integration_test.go
+```
+
+The integration tests live in their own module so the large testcontainers/Docker
+dependency tree (around 40 transitive packages) stays out of `go.mod`. Anyone
+running `go get github.com/llingr/llingr-adapter-kafka` pulls only the two
+direct deps the runtime actually needs: `confluent-kafka-go` and `llingr-nexus`.
+
+The `integration` module declares
+`replace github.com/llingr/llingr-adapter-kafka => ../`, so its tests always
+exercise the local source tree rather than a published version. The
+`integration` module is never published.
+
+## Development
+
+```bash
+# Unit tests only (fast, no Docker, kafkaadapter module)
+make test
+
+# Integration tests (requires Docker, integration module)
+make integration
+
+# Build, unit tests, and integration tests (the default target)
+make
+```
+
+The kafkaadapter module's minimum Go version is 1.24. The integration module
+requires Go 1.26.3.
+
 ## Licence
 
 Apache-2.0 - see [LICENSE](./LICENSE) and [COPYRIGHT](./COPYRIGHT).

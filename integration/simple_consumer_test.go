@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2025 The llingr-adapter-kafka Authors
 // SPDX-License-Identifier: Apache-2.0
 
-package kafkaadapter
+package integration_test
 
 import (
 	"context"

@@ -47,8 +47,6 @@ type mockConsumerBuilder struct {
 	topicName       string
 	buildCalled     bool
 	adaptedConsumer nexus.AdaptedConsumer[*kafka.Message]
-	ctx             context.Context
-	logger          nexus.Logger
 }
 
 func (m *mockConsumerBuilder) TopicName() string {
