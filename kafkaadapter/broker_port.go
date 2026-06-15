@@ -39,7 +39,7 @@ var _ nexus.BandwidthPort[*kafka.Message] = (*Adapter)(nil)
 // For FromRebalanceCallback policy (default), registers a rebalance callback.
 // For FromPoll policy, rebalance events are handled in Poll() instead.
 func (a *Adapter) Subscribe() error {
-	a.logger.Info(a.ctx, "subscribing to topic: %s (rebalancePolicy: %v)", a.topicName, a.rebalancePolicy)
+	a.logger.Info(a.ctx, fmt.Sprintf("subscribing to topic: %s (rebalancePolicy: %v)", a.topicName, a.rebalancePolicy))
 
 	var rebalanceCb kafka.RebalanceCb
 	if a.rebalancePolicy == FromRebalanceCallback {
@@ -49,7 +49,7 @@ func (a *Adapter) Subscribe() error {
 	}
 
 	if err := a.subscribeFn(a.topicName, rebalanceCb); err != nil {
-		a.logger.Error(a.ctx, "subscribe error: %v", err)
+		a.logger.Error(a.ctx, fmt.Sprintf("subscribe error: %v", err))
 		return err
 	}
 
@@ -87,8 +87,8 @@ func (a *Adapter) Poll(timeout time.Duration) (*kafka.Message, bool, error) {
 	switch ev := event.(type) {
 	case *kafka.Message:
 		if ev.TopicPartition.Error != nil {
-			a.logger.Warn(a.ctx, "partition error on %s[%d]: %v",
-				*ev.TopicPartition.Topic, ev.TopicPartition.Partition, ev.TopicPartition.Error)
+			a.logger.Warn(a.ctx, fmt.Sprintf("partition error on %s[%d]: %v",
+				*ev.TopicPartition.Topic, ev.TopicPartition.Partition, ev.TopicPartition.Error))
 			return ev, false, ev.TopicPartition.Error
 		}
 		return ev, true, nil
@@ -111,7 +111,7 @@ func (a *Adapter) Poll(timeout time.Duration) (*kafka.Message, bool, error) {
 		return nil, false, ev
 
 	case kafka.OffsetsCommitted:
-		a.logger.Debug(a.ctx, "offsets committed: %v", ev)
+		a.logger.Debug(a.ctx, fmt.Sprintf("offsets committed: %v", ev))
 		return nil, false, nil
 
 	case kafka.OAuthBearerTokenRefresh:
@@ -125,7 +125,7 @@ func (a *Adapter) Poll(timeout time.Duration) (*kafka.Message, bool, error) {
 		return nil, false, nil
 
 	default:
-		a.logger.Debug(a.ctx, "ignored event type %T: %v", ev, ev)
+		a.logger.Debug(a.ctx, fmt.Sprintf("ignored event type %T: %v", ev, ev))
 		return nil, false, nil
 	}
 }
@@ -143,7 +143,7 @@ func (a *Adapter) handleOAuthTokenRefresh() {
 
 	token, err := a.oauthTokenRefreshFn()
 	if err != nil {
-		a.logger.Error(a.ctx, "OAuth token refresh failed: %v", err)
+		a.logger.Error(a.ctx, fmt.Sprintf("OAuth token refresh failed: %v", err))
 		if a.setOAuthBearerTokenFailureFn != nil {
 			_ = a.setOAuthBearerTokenFailureFn(err.Error())
 		}
@@ -152,7 +152,7 @@ func (a *Adapter) handleOAuthTokenRefresh() {
 
 	if a.setOAuthBearerTokenFn != nil {
 		if err = a.setOAuthBearerTokenFn(token); err != nil {
-			a.logger.Error(a.ctx, "failed to set OAuth bearer token: %v", err)
+			a.logger.Error(a.ctx, fmt.Sprintf("failed to set OAuth bearer token: %v", err))
 			if a.setOAuthBearerTokenFailureFn != nil {
 				_ = a.setOAuthBearerTokenFailureFn(err.Error())
 			}
@@ -211,12 +211,12 @@ func (a *Adapter) CommitOffsets(messages []*nexus.Message[*kafka.Message]) ([]*n
 
 	out, err := a.commitOffsetsFn(commits)
 	if err != nil {
-		a.logger.Error(a.ctx, "failed to commit offsets: %v", err)
+		a.logger.Error(a.ctx, fmt.Sprintf("failed to commit offsets: %v", err))
 		a.logGroupMembershipHintIfApplicable(err)
 		return messages, err
 	}
 
-	a.logger.Debug(a.ctx, "committed offsets: %v", out)
+	a.logger.Debug(a.ctx, fmt.Sprintf("committed offsets: %v", out))
 	return nil, nil
 }
 
@@ -229,9 +229,9 @@ func (a *Adapter) logGroupMembershipHintIfApplicable(err error) {
 	if !isGroupMembershipLost(err) {
 		return
 	}
-	a.logger.Warn(a.ctx,
+	a.logger.Warn(a.ctx, fmt.Sprintf(
 		"commit rejected (group membership lost): session timeout currently %s - likely exceeded during drain, raise via session.timeout.ms config",
-		a.currentSessionTimeoutDescription())
+		a.currentSessionTimeoutDescription()))
 }
 
 // isGroupMembershipLost reports whether a commit error indicates the broker

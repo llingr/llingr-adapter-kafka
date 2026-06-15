@@ -68,12 +68,12 @@ func (a *Adapter) handleAssigned(ev kafka.AssignedPartitions) error {
 	protocol := a.getRebalanceProtocol()
 
 	if protocol == ProtocolCooperative {
-		a.logger.Info(a.ctx, "incrementally assigning partitions: %v", ev.Partitions)
+		a.logger.Info(a.ctx, fmt.Sprintf("incrementally assigning partitions: %v", ev.Partitions))
 		if err := a.incrementalAssignFn(ev.Partitions); err != nil {
 			return fmt.Errorf("incremental assign failed: %w", err)
 		}
 	} else {
-		a.logger.Info(a.ctx, "assigning partitions: %v", ev.Partitions)
+		a.logger.Info(a.ctx, fmt.Sprintf("assigning partitions: %v", ev.Partitions))
 		if err := a.assignFn(ev.Partitions); err != nil {
 			return fmt.Errorf("assign failed: %w", err)
 		}
@@ -105,12 +105,12 @@ func (a *Adapter) handleRevoked(ev kafka.RevokedPartitions) error {
 	protocol := a.getRebalanceProtocol()
 
 	if protocol == ProtocolCooperative {
-		a.logger.Info(a.ctx, "incrementally unassigning partitions: %v", ev.Partitions)
+		a.logger.Info(a.ctx, fmt.Sprintf("incrementally unassigning partitions: %v", ev.Partitions))
 		if err := a.incrementalUnassignFn(ev.Partitions); err != nil {
 			return fmt.Errorf("incremental unassign failed: %w", err)
 		}
 	} else {
-		a.logger.Info(a.ctx, "unassigning partitions: %v", ev.Partitions)
+		a.logger.Info(a.ctx, fmt.Sprintf("unassigning partitions: %v", ev.Partitions))
 		if err := a.unassignFn(); err != nil {
 			return fmt.Errorf("unassign failed: %w", err)
 		}
