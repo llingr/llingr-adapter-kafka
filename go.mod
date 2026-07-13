@@ -4,5 +4,5 @@ go 1.24.3
 
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.14.1
-	github.com/llingr/llingr-nexus v0.10.0
+	github.com/llingr/llingr-nexus v0.10.2
 )
