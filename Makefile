@@ -23,9 +23,11 @@ test:
 	go tool cover -func=coverage.out
 
 # integration are in a separate module under ./integration/ so that
-# testcontainers/Docker dependencies don't bloat the adapter module
+# testcontainers/Docker dependencies don't bloat the adapter module.
+# The unsubscribe gauntlet runs 50 iterations by default
+# (use LLINGR_KAFKA_STRESS_ITERS to override).
 integration:
-	cd integration && go test $(RACE) -timeout 15m ./...
+	cd integration && go test $(RACE) -timeout 30m ./...
 
 cover: test
 	go tool cover -html=coverage.out

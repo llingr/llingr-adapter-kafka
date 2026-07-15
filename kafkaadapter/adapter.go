@@ -45,6 +45,7 @@ package kafkaadapter
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
@@ -107,6 +108,17 @@ type Adapter struct {
 	setOAuthBearerTokenFn        func(kafka.OAuthBearerToken) error
 	setOAuthBearerTokenFailureFn func(string) error
 
+	// ownsConsumer is true when this adapter created the *kafka.Consumer (the
+	// New path), false when it was supplied via NewCustom+SetConsumer. It gates
+	// closing the consumer, both when a panic unwinds through CreateConsumer
+	// and at Unsubscribe, so a user-owned consumer is never closed out from
+	// under its owner.
+	ownsConsumer bool
+
+	// unsubscribeOnce makes Unsubscribe idempotent: the release runs once,
+	// whoever arrives first, and later callers return only after it completed.
+	unsubscribeOnce sync.Once
+
 	// consumer group identity
 	groupID string
 
@@ -153,6 +165,7 @@ func New(configMap *kafka.ConfigMap, policy ...RebalancePolicy) (*Adapter, error
 
 	return &Adapter{
 		kafkaConsumer:                kafkaConsumer,
+		ownsConsumer:                 true,
 		rebalancePolicy:              rebalancePolicy,
 		groupID:                      groupID,
 		configMap:                    configMap,
@@ -194,7 +207,11 @@ func NewCustom(policy ...RebalancePolicy) *Adapter {
 //
 // This method wires up the function fields used by the adapter. Call this
 // before CreateConsumer(). Topic name is provided via builder.WithTopicName().
+// The supplied consumer stays owned by the caller: the adapter never closes
+// it, on any path.
 func (a *Adapter) SetConsumer(kafkaConsumer *kafka.Consumer) {
+	// a supplied consumer is never owned, whatever constructed this adapter
+	a.ownsConsumer = false
 	a.kafkaConsumer = kafkaConsumer
 	a.isClosedFn = kafkaConsumer.IsClosed
 	a.pollFn = kafkaConsumer.Poll
@@ -219,11 +236,37 @@ func (a *Adapter) SetConsumer(kafkaConsumer *kafka.Consumer) {
 //
 // Returns Consumer (not AdaptedConsumer) to hide adapter-internal methods
 // like TriggerRebalance from the host application.
+// closeOnPanic closes the adapter's consumer, swallowing any secondary panic so
+// it cannot mask the primary panic being propagated. Used to avoid leaking a
+// consumer this adapter created when builder.Build panics in CreateConsumer.
+func (a *Adapter) closeOnPanic() {
+	defer func() { _ = recover() }()
+	if a.closeFn != nil {
+		_ = a.closeFn()
+	}
+}
+
 func (a *Adapter) CreateConsumer(builder nexus.ConsumerBuilder[*kafka.Message]) nexus.Consumer[*kafka.Message] {
 	a.topicName = builder.TopicName()
 	if a.bwCollector != nil {
 		a.bwCollector.topicName = a.topicName
 	}
+
+	// builder.Build panics on critical misconfiguration (e.g. an out-of-range
+	// DemuxConfig). If this adapter owns the consumer (the New path), close it
+	// before the panic unwinds so a recovering caller - for example a custom
+	// init function wrapping this library - does not leak the consumer and its
+	// librdkafka threads. A consumer supplied via SetConsumer is left to its
+	// owner.
+	if a.ownsConsumer {
+		defer func() {
+			if r := recover(); r != nil {
+				a.closeOnPanic()
+				panic(r)
+			}
+		}()
+	}
+
 	a.adaptedConsumer = builder.Build(a)
 	a.ctx = a.adaptedConsumer.Context()
 	a.logger = a.adaptedConsumer.Logger()

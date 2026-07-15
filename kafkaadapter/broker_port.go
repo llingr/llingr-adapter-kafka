@@ -56,13 +56,27 @@ func (a *Adapter) Subscribe() error {
 	return nil
 }
 
-// Unsubscribe and close the consumer.
+// Unsubscribe leaves the consumer group and, when this adapter owns the
+// consumer (the New path), closes it; a consumer supplied via SetConsumer is
+// left to its owner, which may keep using it after the group is left.
+//
+// Idempotent: the release runs once, whoever arrives first - the engine's
+// drain or a host-side emergency cleanup - and later callers return once it
+// has completed, so none can report done while the release is in flight.
 func (a *Adapter) Unsubscribe() error {
-	if a.closeFn != nil {
-		_ = a.unsubscribeFn()
+	a.unsubscribeOnce.Do(a.releaseConsumer)
+	return nil
+}
+
+// releaseConsumer is Unsubscribe's body, run exactly once.
+func (a *Adapter) releaseConsumer() {
+	if a.closeFn == nil {
+		return
+	}
+	_ = a.unsubscribeFn()
+	if a.ownsConsumer {
 		_ = a.closeFn()
 	}
-	return nil
 }
 
 // Poll fetches the next message from Kafka.

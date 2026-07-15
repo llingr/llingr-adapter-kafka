@@ -135,6 +135,7 @@ func TestUnsubscribe_NilConsumer(t *testing.T) {
 
 func TestUnsubscribe_WithConsumer(t *testing.T) {
 	adapter := NewCustom()
+	adapter.ownsConsumer = true // owned: Unsubscribe both leaves and closes
 
 	unsubscribeCalled := false
 	closeCalled := false
@@ -163,6 +164,7 @@ func TestUnsubscribe_WithConsumer(t *testing.T) {
 
 func TestUnsubscribe_IgnoresErrors(t *testing.T) {
 	adapter := NewCustom()
+	adapter.ownsConsumer = true // owned: both fns run, both errors swallowed
 
 	adapter.unsubscribeFn = func() error {
 		return errors.New("unsubscribe error")
