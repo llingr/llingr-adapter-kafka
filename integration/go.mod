@@ -10,7 +10,7 @@ replace github.com/llingr/llingr-adapter-kafka => ../
 require (
 	github.com/confluentinc/confluent-kafka-go/v2 v2.14.1
 	github.com/llingr/llingr-adapter-kafka v0.0.0-00010101000000-000000000000
-	github.com/llingr/llingr-nexus v0.11.0
+	github.com/llingr/llingr-nexus v0.11.2
 	github.com/testcontainers/testcontainers-go/modules/kafka v0.40.0
 	github.com/twmb/franz-go v1.21.1
 	github.com/twmb/franz-go/pkg/kfake v0.0.0-20260704163952-0aa5aa63c8fd
